@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Job Tracker</title>
+
+    <style>
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #38bdf8;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #38bdf8;
+            color: black;
+            font-weight: bold;
+        }
+
+        .application {
+            background: #334155;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🚀 Rizki Job Tracker</h1>
+
+    <div class="card">
+
+        <h2>Add Application</h2>
+
+        <input type="text" id="company" placeholder="Company">
+
+        <input type="text" id="position" placeholder="Position">
+
+        <select id="status">
+
+            <option>Applied</option>
+            <option>Interview</option>
+            <option>Rejected</option>
+            <option>Accepted</option>
+
+        </select>
+
+        <input type="date" id="apply_date">
+
+        <textarea id="notes" placeholder="Notes"></textarea>
+
+        <button onclick="addApplication()">
+            Add Application
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Applications</h2>
+
+        <div id="applications"></div>
+
+    </div>
+
+    <script>
+
+        async function loadApplications() {
+
+            const response =
+                await fetch('/api/applications');
+
+            const data =
+                await response.json();
+
+            let html = '';
+
+            data.forEach(app => {
+
+                html += `
+                    <div class="application">
+
+                        <h3>
+                            ${app.company}
+                        </h3>
+
+                        <p>
+                            Position:
+                            ${app.position}
+                        </p>
+
+                        <p>
+                            Status:
+                            ${app.status}
+                        </p>
+
+                        <p>
+                            Apply Date:
+                            ${app.apply_date}
+                        </p>
+
+                        <p>
+                            Notes:
+                            ${app.notes}
+                        </p>
+
+                        <button onclick="deleteApplication(${app.id})">
+                            Delete
+                        </button>
+
+                    </div>
+                `;
+            });
+
+            document.getElementById('applications').innerHTML = html;
+        }
+
+        async function addApplication() {
+
+            const company =
+                document.getElementById('company').value;
+
+            const position =
+                document.getElementById('position').value;
+
+            const status =
+                document.getElementById('status').value;
+
+            const apply_date =
+                document.getElementById('apply_date').value;
+
+            const notes =
+                document.getElementById('notes').value;
+
+            await fetch('/api/applications', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+                    company,
+                    position,
+                    status,
+                    apply_date,
+                    notes
+                })
+            });
+
+            loadApplications();
+        }
+
+        async function deleteApplication(id) {
+
+            await fetch(`/api/applications/${id}`, {
+
+                method: 'DELETE'
+            });
+
+            loadApplications();
+        }
+
+        loadApplications();
+
+    </script>
+
+</body>
+
+</html>
